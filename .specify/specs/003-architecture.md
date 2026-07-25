@@ -47,12 +47,12 @@ The solution follows Clean Architecture.
                 | Rule Engine          |
                 | Services             |
                 +----------+-----------+
-                           |
-                           v
+                           ↑
+                           | implements abstractions
                 +----------------------+
                 | Infrastructure       |
-                | JSON Rules           |
-                | Configuration Loader |
+                | JsonRuleProvider               |
+                | JSON Configuration   |
                 +----------------------+
 ```
 
@@ -65,27 +65,22 @@ JSON serialization or configuration frameworks.
 
 Business rules are externalized into JSON configuration files.
 
-The engine loads:
+The Infrastructure layer is responsible for loading, deserializing, and validating the configuration at application startup. The configuration is then exposed to the Rule Engine as strongly typed rule definitions.
 
-- Cluster definitions
-- Job categories
-- Income matrix
-- Penalty rules
+The Rule Engine has no knowledge of JSON or the underlying configuration source. It evaluates the provided rules deterministically according to their configured priority.
 
-at application startup.
-
-The application evaluates rules in priority order.
+The classification workflow follows:
 
 ```
 Customer
 
 ↓
 
-Cluster Rules
+Cluster Evaluation
 
 ↓
 
-Job Category Rules
+Job Category Evaluation
 
 ↓
 
@@ -93,7 +88,7 @@ Income Lookup
 
 ↓
 
-Penalty Rules
+Penalty Evaluation
 
 ↓
 
@@ -124,6 +119,19 @@ Future implementations could replace the JSON provider with:
 - Rule Service
 
 without changing the domain layer.
+
+### Configuration Boundary
+
+JSON is an infrastructure concern.
+
+The Infrastructure layer is responsible for loading, deserializing,
+and validating the configuration.
+
+The Domain layer operates on strongly typed rule definitions and has
+no knowledge of the underlying configuration format.
+
+Configuration is loaded and validated at application startup.
+Invalid configuration prevents the application from starting.
 
 ---
 
@@ -226,6 +234,26 @@ The rule set is relatively small and deterministic.
 
 A lightweight implementation is easier to understand,
 maintain and test than introducing an external rules framework.
+
+---
+
+### Why a Domain-Specific Rule Schema?
+
+The rule configuration uses a domain-specific schema rather than a generic
+expression-based rule language.
+
+The current business rules operate on a small and well-defined set of customer
+attributes. Modeling these conditions explicitly keeps the configuration
+strongly typed, readable, easy to validate, and straightforward to test.
+
+A generic rule language based on fields, operators, and arbitrary expressions
+would provide greater flexibility, but would introduce additional complexity
+in parsing, type validation, error handling, and rule execution that is not
+justified by the current requirements.
+
+The design favors the simplest model that satisfies the configuration-driven
+requirement while preserving the ability to evolve the rule model as new
+business requirements emerge.
 
 ---
 
