@@ -1033,3 +1033,68 @@ Codex created a neutral integration-test fixture with six valid requests and the
 
 **Final solution:**
 `tests/fixtures/expected-output.json` contains six exact expected outputs covering cluster thresholds, category precedence, fallback, penalty, conservative rounding, and text normalization.
+
+## 080 — Incremental test-plan strategy
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Revise the implementation plan so mandatory tests are delivered with each implementation increment rather than in an isolated testing phase.
+
+**What happened:**
+Codex distributed domain and API test requirements to the phases that introduce those behaviors and removed the late testing phase.
+
+**Final solution:**
+The plan now requires incremental test delivery, domain unit tests with the rule engine, API integration tests with the six fixtures, and `dotnet test` as the complete-suite command.
+
+## 081 — Four-project implementation foundation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Align the first implementation phase with the approved four-project architecture and remove foundation items outside the current requirements.
+
+**What happened:**
+Codex replaced the generic foundation with the production and test project structure, API-owned rules content, dependency enforcement, OpenAPI, and executable quality gates.
+
+**Final solution:**
+Phase 1 establishes the four-project solution, test projects, API `rules/` content, composition/OpenAPI baseline, and successful `dotnet build` plus `dotnet test` execution.
+
+## 082 — Domain implementation phase alignment
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Replace the outdated Domain phase deliverables with the approved pure models, engine, validator, and mandatory unit tests.
+
+**What happened:**
+Codex aligned the phase with the `RulesPolicy` architecture and moved full business-rule coverage into the Domain increment.
+
+**Final solution:**
+Phase 2 implements the pure policy and analysis model, `RulesPolicyValidator`, `CreditAnalysisEngine`, and all required Domain unit tests without ASP.NET, JSON, or FluentValidation dependencies.
+
+## 083 — Application, Infrastructure, and API phase order
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Reorder the implementation plan so Application defines the use case and port before Infrastructure implements JSON loading, followed by API startup composition and HTTP delivery.
+
+**What happened:**
+Codex replaced legacy provider and service names with the approved layer responsibilities and moved each test type into its owning increment.
+
+**Final solution:**
+Phase 3 implements `ClassifyCustomer` and `IPolicyLoader`; Phase 4 implements `JsonPolicyLoader` and contract tests; Phase 5 composes the immutable snapshot and delivers the validated HTTP API with six-fixture integration coverage.
+
+## 084 — Operational documentation and final quality gates
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Align the final implementation-plan phases with operational documentation and measurable repository-evaluation criteria.
+
+**What happened:**
+Codex removed the generic documentation and final-review wording, avoiding duplication of the normative specifications while making the expected runtime documentation and final checks explicit.
+
+**Final solution:**
+Phase 6 documents building, testing, running, API-owned policy files, and the implemented architecture. Phase 7 verifies build and test execution, exact fixtures, startup and HTTP errors, OpenAPI, dependency direction, and final hygiene.
