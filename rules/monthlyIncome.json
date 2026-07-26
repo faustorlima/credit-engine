@@ -1,0 +1,104 @@
+{
+  "monthlyIncome": [
+    {
+      "clusterId": "CLUSTER_A",
+      "incomeValues": [
+        {
+          "category": "EXECUTIVE",
+          "value": 30000
+        },
+        {
+          "category": "SENIOR_PROFESSIONAL",
+          "value": 20000
+        },
+        {
+          "category": "MID_PROFESSIONAL",
+          "value": 12000
+        },
+        {
+          "category": "JUNIOR_PROFESSIONAL",
+          "value": 8000
+        },
+        {
+          "category": "OTHER",
+          "value": 10000
+        }
+      ]
+    },
+    {
+      "clusterId": "CLUSTER_B",
+      "incomeValues": [
+        {
+          "category": "EXECUTIVE",
+          "value": 20000
+        },
+        {
+          "category": "SENIOR_PROFESSIONAL",
+          "value": 15000
+        },
+        {
+          "category": "MID_PROFESSIONAL",
+          "value": 8000
+        },
+        {
+          "category": "JUNIOR_PROFESSIONAL",
+          "value": 5000
+        },
+        {
+          "category": "OTHER",
+          "value": 6500
+        }
+      ]
+    },
+    {
+      "clusterId": "CLUSTER_C",
+      "incomeValues": [
+        {
+          "category": "EXECUTIVE",
+          "value": 10000
+        },
+        {
+          "category": "SENIOR_PROFESSIONAL",
+          "value": 7000
+        },
+        {
+          "category": "MID_PROFESSIONAL",
+          "value": 5000
+        },
+        {
+          "category": "JUNIOR_PROFESSIONAL",
+          "value": 3000
+        },
+        {
+          "category": "OTHER",
+          "value": 4000
+        }
+      ]
+    },
+    {
+      "clusterId": "CLUSTER_D",
+      "incomeValues": [
+        {
+          "category": "EXECUTIVE",
+          "value": 0
+        },
+        {
+          "category": "SENIOR_PROFESSIONAL",
+          "value": 0
+        },
+        {
+          "category": "MID_PROFESSIONAL",
+          "value": 0
+        },
+        {
+          "category": "JUNIOR_PROFESSIONAL",
+          "value": 0
+        },
+        {
+          "category": "OTHER",
+          "value": 0
+        }
+      ]
+    }
+  ]
+}

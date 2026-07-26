@@ -383,3 +383,445 @@ Codex consolidated the approved product behavior, input validation, calculation,
 
 **Final solution:**
 `001-requirements.md` was updated to reflect the approved decisions from the specification review.
+
+## 030 — Fallback cluster identification
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Decide whether the requirements should identify the cluster fallback by its ID or by the `conditions.catchAll` attribute.
+
+**What happened:**
+Codex explained that an ID-based reference couples the requirements to one concrete policy entry, even though fallback selection is determined by configuration.
+
+**Final solution:**
+The fallback cluster is identified exclusively by `conditions.catchAll: true`. References to `CLUSTER_D` in the requirements were replaced with the generic fallback-cluster concept while retaining the initial policy's zero-income and zero-limit outcome.
+
+## 031 — Job-title category multiplier naming
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Resolve the naming difference between the JSON category field `multiplier` and the multiplier used in the approved-limit formula.
+
+**What happened:**
+Codex proposed retaining the compact field name in the category JSON while using a descriptive conceptual name in the formula.
+
+**Final solution:**
+The JSON field remains `multiplier`. The requirements refer to its calculation input as `jobTitleCategoryMultiplier`, which is the multiplier of the matched job-title category.
+
+## 032 — Cluster-condition contract alignment
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Align the cluster-condition contract in `002-rules-configuration.md` with the JSON field names and define the semantics of the fallback condition.
+
+**What happened:**
+Codex compared the cluster JSON with the existing condition table and identified outdated names and the absence of an explicit `catchAll` contract.
+
+**Final solution:**
+`002-rules-configuration.md` now defines `hasMarketDebt`, `excludedMarketDebtTypes`, and `catchAll`. A `catchAll` condition is the only condition on the unique cluster fallback, which has the greatest priority.
+
+## 033 — Fallback evaluation order wording
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Clarify the wording that determines the fallback cluster's priority and evaluation order.
+
+**What happened:**
+Codex explained that a `catchAll` rule matches every customer and therefore must be evaluated after all specific cluster rules.
+
+**Final solution:**
+The requirements and configuration contract now state that the fallback has the greatest numeric `priority` value and is evaluated last.
+
+## 034 — Job-title category identifier
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define whether a job-title category's `name` is its technical identifier and how the income matrix references it.
+
+**What happened:**
+Codex showed that category names such as `EXECUTIVE` are the values used by the income matrix's `category` field.
+
+**Final solution:**
+`name` is the unique canonical identifier of a job-title category, and income-matrix entries reference the category through that value.
+
+## 035 — Job-title category fallback
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define how the `OTHER` job-title category is represented and evaluated as the fallback.
+
+**What happened:**
+Codex compared the `OTHER` entry in the category JSON with the category-selection requirements.
+
+**Final solution:**
+`OTHER` is the unique fallback category. Its `keywords` list is empty, it has the greatest numeric `priority` value, and it is evaluated last.
+
+## 036 — Configuration-contract boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Keep `002-rules-configuration.md` limited to information additional to `001-requirements.md`, without duplicating job-title matching behavior.
+
+**What happened:**
+Codex separated the category data contract from the business behavior already defined by FR-003.
+
+**Final solution:**
+`002-rules-configuration.md` defines category fields and fallback structure, while referring to FR-003 for keyword interpretation and category selection. Duplicated matching rules were removed.
+
+## 037 — Job-title category data contract
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Complete the job-title category data contract and require keywords for every non-fallback category.
+
+**What happened:**
+Codex replaced the incomplete category section with a field-level contract matching the current JSON structure.
+
+**Final solution:**
+Each job-title category defines `name`, `priority`, `multiplier`, and `keywords`. `keywords` is required and non-empty except for the `OTHER` fallback category.
+
+## 038 — Income-matrix data contract
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Document the nested income-matrix JSON structure and its references without duplicating the coverage requirement in `001-requirements.md`.
+
+**What happened:**
+Codex mapped the `monthlyIncome` JSON into matrix-entry and income-value records, then separated structural references from the FR-004 coverage behavior.
+
+**Final solution:**
+The configuration contract defines `MonthlyIncomeEntry` (`clusterId`, `incomeValues`) and `IncomeValue` (`category`, `value`). Their references are validated against configured clusters and categories; FR-004 remains the source for matrix completeness.
+
+## 039 — Domain-specific penalty condition
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Replace the generic penalty predicate with a domain-specific market-debt condition that aligns with the architecture.
+
+**What happened:**
+Codex identified that `targetField` and `operator` formed a generic mini-language despite the architecture's domain-specific-schema decision.
+
+**Final solution:**
+Penalty rules now use `conditions.marketDebtTypesAnyOf`. The configuration contract defines its structure and valid values, while FR-005 remains responsible for selecting one applicable penalty rule.
+
+## 040 — Cluster-selection contract boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Remove cluster-selection behavior duplicated from the requirements and retain only the configuration contract in `002-rules-configuration.md`.
+
+**What happened:**
+Codex identified that priority evaluation and first-match selection were already fully defined by FR-002.
+
+**Final solution:**
+The cluster configuration contract now refers to FR-002 for cluster selection and no longer repeats the runtime evaluation behavior.
+
+## 041 — Rules-configuration purpose boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Remove the infrastructure-loading concern from the purpose of `002-rules-configuration.md` and limit it to the policy contract.
+
+**What happened:**
+Codex separated the configuration contract from the architecture's responsibility for loading configuration.
+
+**Final solution:**
+`002-rules-configuration.md` now defines the logical contract that JSON policy documents must satisfy; infrastructure loading remains an architectural concern.
+
+## 042 — Configuration consistency boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Replace repeated configuration-validation behavior with structural consistency rules that belong to the configuration contract.
+
+**What happened:**
+Codex separated runtime and numeric validation from the referential and uniqueness checks required to make the policy documents coherent.
+
+**Final solution:**
+The final section of `002-rules-configuration.md` is now Configuration Consistency. It defines JSON conformance, unique identifiers, and matrix-entry uniqueness; runtime, startup, and numeric constraints remain in `001-requirements.md`.
+
+## 043 — Policy-document convention
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Make the four JSON policy documents and their root properties explicit in the configuration contract.
+
+**What happened:**
+Codex replaced the generic rule-group list with the actual policy-document convention.
+
+**Final solution:**
+The configuration contract identifies the four JSON documents and their root properties: `customerClusters.json`/`clusters`, `jobTitleCategories.json`/`jobTitleCategories`, `monthlyIncome.json`/`monthlyIncome`, and `penaltyRules.json`/`penaltyRules`.
+
+## 044 — Credit-limit input sources
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Make explicit which configuration fields provide the inputs to the approved-limit calculation without repeating its formula.
+
+**What happened:**
+Codex traced each formula input to its cluster, job-title-category, or penalty-rule source and distinguished income lookup from limit calculation.
+
+**Final solution:**
+The configuration contract maps `baseLimit`, `cap`, `jobTitleCategoryMultiplier`, and `penaltyFactor` to their sources. It also states that the income matrix supplies `monthlyIncome` but is not an approved-limit input.
+
+## 045 — Explicit non-fallback cluster conditions
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Prevent a cluster without conditions from acting as an implicit fallback.
+
+**What happened:**
+Codex identified that an unconstrained non-fallback cluster would match every customer and shadow later rules.
+
+**Final solution:**
+Every non-fallback cluster must define at least one condition other than `catchAll`.
+
+## 046 — Cluster-condition value consistency
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define valid ranges for score and age cluster conditions, and decide whether an empty excluded-debt-type list is valid.
+
+**What happened:**
+Codex proposed input-domain ranges and non-empty exclusions. The user accepted the ranges and clarified that an empty exclusion list is meaningful.
+
+**Final solution:**
+Cluster score and age conditions are constrained to the valid input domain, with coherent age bounds. `excludedMarketDebtTypes` may be empty, meaning debt type does not restrict that cluster condition.
+
+## 047 — Explicit fallback-cluster definition
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Make explicit that the cluster fallback is determined by `catchAll: true`, while respecting priority-based evaluation.
+
+**What happened:**
+Codex separated fallback identification in the configuration contract from the ascending-priority selection behavior in FR-002.
+
+**Final solution:**
+A cluster is the fallback if and only if its conditions contain only `catchAll: true`. Its greatest numeric priority value causes it to be evaluated after all preceding cluster rules.
+
+## 048 — Empty penalty-rule configuration
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Decide whether the penalty-rule list may be empty and clarify the default factor when no rule applies.
+
+**What happened:**
+Codex verified that FR-005 already defines the default `penaltyFactor` as `1.0` when no penalty rule matches.
+
+**Final solution:**
+`penaltyRules` may be empty. In that case no rule is selected and FR-005 supplies the default `penaltyFactor` of `1.0`.
+
+## 049 — Non-approved cluster values
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Decide whether every non-approved cluster must have zero limit and income values.
+
+**What happened:**
+Codex identified that the current zero values belong to the initial fallback policy and asked whether they should become a general invariant.
+
+**Final solution:**
+`approved: false` does not impose fixed `baseLimit`, `cap`, or income values. Those values remain configurable policy data.
+
+## 050 — Closed policy-document contract
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Decide whether the policy JSON documents may contain properties not defined by the configuration contract.
+
+**What happened:**
+Codex explained that accepting unknown properties could silently ignore misspelled or unsupported configuration.
+
+**Final solution:**
+The policy-document contract is closed: objects may contain only properties declared by their corresponding `002-rules-configuration.md` contract.
+
+## 051 — Optional policy properties
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define whether optional configuration properties may use JSON `null`.
+
+**What happened:**
+Codex distinguished omission from nullability to remove ambiguity from optional field types.
+
+**Final solution:**
+Optional properties may be omitted. If present, they must contain a non-null value of the declared type; JSON `null` is invalid.
+
+## 052 — Canonical policy identifiers
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define validity and reference matching for cluster, category, and penalty identifiers.
+
+**What happened:**
+Codex identified that configuration references require an exact canonical representation to prevent ambiguous joins.
+
+**Final solution:**
+Cluster `id`, category `name`, and penalty `ruleId` are non-empty strings. References use exact, case-sensitive matching.
+
+## 053 — Valid job-title keywords
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Prevent job-title keywords that normalize to an empty value from matching every title.
+
+**What happened:**
+Codex connected the category data contract to the existing FR-003 normalization rule and identified empty normalized keywords as a universal-match risk.
+
+**Final solution:**
+Every configured job-title keyword must normalize to a non-empty value under FR-003.
+
+## 054 — Unique normalized job-title keywords
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Prevent duplicate job-title keywords that become identical after normalization within a category.
+
+**What happened:**
+Codex identified that normalized duplicates do not change category matching but make the configuration redundant.
+
+**Final solution:**
+Within each job-title category, normalized keyword values must be unique.
+
+## 055 — Unique configured debt types
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Prevent repeated debt-type values in cluster exclusions and penalty conditions.
+
+**What happened:**
+Codex identified that both fields represent sets, so repeated canonical debt types do not change policy behavior.
+
+**Final solution:**
+`excludedMarketDebtTypes` and `marketDebtTypesAnyOf` require unique values.
+
+## 056 — Explicit fallback marker retained
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Evaluate replacing the explicit fallback marker with an empty conditions object, then decide the final representation.
+
+**What happened:**
+Codex compared a shorter empty-object convention with the explicit intent conveyed by `catchAll: true`.
+
+**Final solution:**
+The explicit `catchAll: true` marker is retained. It is optional for normal clusters, mandatory for the fallback cluster, and `catchAll: false` is invalid.
+
+## 057 — Single cluster-rule field definition
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Remove the redundant cluster-rule field summary and keep one authoritative definition.
+
+**What happened:**
+Codex identified that the summary duplicated the field table immediately below it.
+
+**Final solution:**
+The redundant summary was removed; the `ClusterRule` table is the sole definition of cluster fields.
+
+## 058 — Cluster display-name validity
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define whether a cluster display name may be empty.
+
+**What happened:**
+Codex identified that the display name is returned as part of the matched cluster configuration and should therefore be meaningful.
+
+**Final solution:**
+A cluster `name` must be non-empty after trimming leading and trailing spaces.
+
+## 059 — Canonical identifier whitespace
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Decide whether technical policy identifiers may contain leading or trailing spaces.
+
+**What happened:**
+Codex distinguished display-name trimming from the exact representation needed by configuration references.
+
+**Final solution:**
+Cluster `id`, category `name`, and penalty `ruleId` must not contain leading or trailing spaces.
+
+## 060 — Numeric-constraint boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Clarify the boundary between numeric constraints in the requirements and field-specific limits in the configuration contract.
+
+**What happened:**
+Codex identified that the configuration contract now defines score and age condition ranges while the requirements define general policy-value constraints.
+
+**Final solution:**
+`001-requirements.md` remains the source for general numeric policy constraints; `002-rules-configuration.md` defines field-specific condition limits.
+
+## 061 — Decimal JSON representation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define how monetary values and factors declared as decimal must be represented in the policy JSON documents.
+
+**What happened:**
+Codex identified that the contract named decimal types but did not distinguish JSON numbers from numeric strings or state decimal-scale policy.
+
+**Final solution:**
+Decimal fields must use JSON numbers, never strings. Their decimal scale is unrestricted unless another constraint applies.
+
+## 062 — Integer JSON representation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define how fields declared as integer must be represented in policy JSON documents.
+
+**What happened:**
+Codex applied the same native-type principle used for decimals to priorities and cluster condition values.
+
+**Final solution:**
+Integer fields must use JSON numbers without a fractional part and must not be represented as strings.
+
+## 063 — Boolean JSON representation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define how boolean policy fields must be represented in JSON.
+
+**What happened:**
+Codex applied the native-type convention to `approved`, `hasMarketDebt`, and `catchAll`.
+
+**Final solution:**
+Boolean fields must use JSON booleans rather than strings; `catchAll`, when present, remains restricted to `true`.

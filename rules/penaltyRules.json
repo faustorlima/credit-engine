@@ -1,0 +1,15 @@
+{
+  "penaltyRules": [
+    {
+      "priority": 1,
+      "ruleId": "DEFAULT_DEBT_PENALTY",
+      "conditions": {
+        "marketDebtTypesAnyOf": [
+          "credit_default",
+          "loan_default"
+        ]
+      },
+      "penaltyFactor": 0.5
+    }
+  ]
+}

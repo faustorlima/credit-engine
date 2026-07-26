@@ -93,9 +93,9 @@ Acceptance criteria:
 - Cluster rules are evaluated in ascending numeric `priority` order.
 - The first matching cluster wins.
 - Exactly one cluster fallback is required. It is identified by
-  `conditions.catchAll: true` and is `CLUSTER_D` in the initial policy.
-- The fallback has the greatest numeric priority and applies when no preceding
-  cluster matches.
+  `conditions.catchAll: true`.
+- The fallback has the greatest numeric `priority` value and is evaluated last;
+  it applies when no preceding cluster matches.
 
 ### FR-003 Job-title categorization
 
@@ -117,8 +117,9 @@ category using the configured income matrix.
 Acceptance criteria:
 
 - The matrix must define an income for every configured cluster/category pair,
-  including `OTHER` and `CLUSTER_D`.
-- The initial policy defines monthly income as zero for `CLUSTER_D`.
+  including the fallback job-title category and the fallback cluster.
+- The initial policy defines monthly income as zero for every pair involving the
+  fallback cluster.
 
 ### FR-005 Penalty selection
 
@@ -139,7 +140,7 @@ job-title category, and selected penalty.
 
 ```text
 approvedLimit = round_to_nearest_100(
-  min(baseLimit × jobMultiplier × penaltyFactor, cap)
+  min(baseLimit × jobTitleCategoryMultiplier × penaltyFactor, cap)
 )
 ```
 
@@ -149,7 +150,7 @@ Acceptance criteria:
 - The result is rounded to the nearest multiple of 100.
 - When exactly halfway between two multiples of 100, the result is rounded down
   to the lower multiple.
-- The initial `CLUSTER_D` policy produces an unapproved decision with zero
+- The initial fallback-cluster policy produces an unapproved decision with zero
   income and zero approved limit.
 
 ### FR-007 Classification API
@@ -184,12 +185,12 @@ prevents startup.
 - Priorities are positive integers and unique within each group of cluster,
   job-title-category, or penalty rules. Gaps are allowed.
 - A cluster fallback is required; it must use `conditions.catchAll: true` and
-  have the greatest priority.
+  have the greatest numeric `priority` value, so it is evaluated last.
 - An `OTHER` job-title-category fallback is required.
 - Penalty rules do not require a fallback.
 - `baseLimit`, `cap`, and `monthlyIncome` are non-negative.
 - `cap` is greater than or equal to `baseLimit`.
-- `jobMultiplier` is greater than zero.
+- `jobTitleCategoryMultiplier` is greater than zero.
 - `penaltyFactor` is between zero and one, inclusive.
 
 ---
