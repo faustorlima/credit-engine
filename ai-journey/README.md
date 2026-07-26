@@ -1,15 +1,27 @@
 # Credit Engine
 
-## Tools
+## Claude, GPT, and Gemini
 
-### Claude, GPT, and Gemini
+- Explore the challenge requirements, including what to prioritize and which structure to use.
+- Explore the software requirements.
 
-Explore requirements and define solutions (a kind of refinement).
+## GPT
 
-### GPT
+- Create the first version of the requirements specification.
+- Create the first version of the architecture specification.
+- Create the first version of the implementation plan specification.
 
-After deciding to use SDD (Spec-Driven Development) for the challenge, I used GPT to create the first version of the specification files based on the Credit Engine — Backend Challenge document.
+## GitHub
 
-### VS Code + OpenAI Codex coding agent
+- Create a public repository to store the solution code.
 
-I created the initial solution in VS Code, refined the specification files with Codex, and then asked Codex to implement the software based on what was described.
+## VS Code
+
+- Create and structure the solution in VS Code.
+
+## VS Code + OpenAI Codex coding agent
+
+- Refine the requirements specification with Codex while double-checking the Backend Challenge document.
+- Create and refine the rule-configuration specification with Codex after defining the structure of the JSON files that contain credit-analysis rules.
+- Refine the architecture specification with Codex to keep it clear before generating code.
+- Generate code for each of the seven implementation phases with Codex.
