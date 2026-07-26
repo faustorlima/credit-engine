@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CreditEngine.Api.IntegrationTests/CreditEngine.Api.IntegrationTests.csproj" />
+    <Project Path="tests/CreditEngine.Application.Tests/CreditEngine.Application.Tests.csproj" />
     <Project Path="tests/CreditEngine.Domain.Tests/CreditEngine.Domain.Tests.csproj" />
     <Project Path="tests/CreditEngine.Infrastructure.Tests/CreditEngine.Infrastructure.Tests.csproj" />
   </Folder>

@@ -1124,3 +1124,16 @@ Codex implemented the pure .NET 8 Domain model, including `Customer` invariants,
 
 **Final solution:**
 The Domain project has no ASP.NET Core, JSON, FluentValidation, or external package dependencies. It builds independently, and the complete `dotnet test` suite passes with all 35 current Domain tests approved.
+
+## 087 — Application use-case implementation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> [specs](.specify/specs/) execute a fase 3 descrita em specs/004-implementation-plan.md.
+
+**What happened:**
+Codex added `IPolicyLoader` as the asynchronous Application port and implemented `ClassifyCustomer` as a thin orchestrator over `CreditAnalysisEngine` and an injected immutable `RulesPolicy`. It also created the `CreditEngine.Application.Tests` project and registered it in the solution.
+
+**Final solution:**
+Application depends only on Domain and contains no JSON or HTTP dependency. Its two use-case/port tests pass, while the complete suite reports 37 approved tests.
