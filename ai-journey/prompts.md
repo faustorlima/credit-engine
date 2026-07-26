@@ -825,3 +825,211 @@ Codex applied the native-type convention to `approved`, `hasMarketDebt`, and `ca
 
 **Final solution:**
 Boolean fields must use JSON booleans rather than strings; `catchAll`, when present, remains restricted to `true`.
+
+## 064 — API-hosted policy documents
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Reconsider the architecture as API, Application, Domain, and Infrastructure layers, with policy JSON documents in an API-layer `rules/` folder.
+
+**What happened:**
+Codex separated physical ownership of the deployable rule files from responsibility for parsing and interpreting them.
+
+**Final solution:**
+`rules/` is API-layer content. The API composition root supplies its location at startup; Infrastructure loads and maps the JSON policy documents, while Domain remains independent of JSON and ASP.NET.
+
+## 065 — Immutable policy snapshot
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define how the four-layer architecture provides immutable rule configuration after application startup.
+
+**What happened:**
+Codex proposed a startup-only loading port and a read-only policy snapshot instead of provider access during requests.
+
+**Final solution:**
+Application defines `IPolicyLoader`; Infrastructure implements it with `JsonPolicyLoader`. Startup creates one immutable `RulesPolicy` snapshot, which Application use cases and the Rule Engine consume without runtime file access.
+
+## 066 — Two-stage policy validation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Separate JSON-document validation from logical policy validation in the four-layer architecture.
+
+**What happened:**
+Codex distinguished serialization concerns from the policy invariants defined by the configuration contract.
+
+**Final solution:**
+Infrastructure validates JSON syntax, types, nullability, and allowed properties while mapping to `RulesPolicy`. Domain `RulesPolicyValidator` validates logical invariants; API/Application coordinates both stages during startup.
+
+## 067 — Domain model alignment
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Align the Domain model concepts with the requirements and the logical policy contract, removing redundant names.
+
+**What happened:**
+Codex compared the original generic model list with the concrete cluster, category, matrix, penalty, and analysis concepts now defined in the specifications.
+
+**Final solution:**
+The Domain model is `Customer`, `RulesPolicy`, `ClusterRule`, `JobTitleCategory`, `IncomeMatrix`, `PenaltyRule`, `CreditAnalysis`, `RulesPolicyValidator`, and `CreditAnalysisEngine`.
+
+## 068 — API response-mapping boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define how complete matched policy objects are returned by the API without leaking Infrastructure JSON DTOs.
+
+**What happened:**
+Codex separated the logical analysis result from HTTP mapping and JSON deserialization concerns.
+
+**Final solution:**
+Application returns `CreditAnalysis`; API maps it to `creditAnalysisResult` under FR-007. Infrastructure JSON DTOs are never exposed in HTTP responses.
+
+## 069 — Layered architecture test strategy
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Expand the architecture test strategy to cover the rule-policy contract and the responsibilities of each layer.
+
+**What happened:**
+Codex mapped the requirements and configuration-contract risks to Domain, Infrastructure, and Application/API tests.
+
+**Final solution:**
+The architecture now requires domain rule and invariant tests, Infrastructure JSON-contract tests, and startup plus HTTP integration tests.
+
+## 070 — Classification use-case boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define the concrete Application use case and its responsibilities in the four-layer architecture.
+
+**What happened:**
+Codex separated use-case orchestration from HTTP handling, JSON access, and Domain rule execution.
+
+**Final solution:**
+`ClassifyCustomer` receives a normalized customer, invokes `CreditAnalysisEngine` with the immutable policy snapshot, and returns `CreditAnalysis` without containing transport, configuration, or classification logic.
+
+## 071 — Concrete layer diagram
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Align the architecture diagram with the concrete Application and Domain components already defined.
+
+**What happened:**
+Codex replaced generic layer labels with the classification use case, immutable policy snapshot, engine, policy model, and validator.
+
+**Final solution:**
+The diagram now represents `ClassifyCustomer`, `RulesPolicy`, `CreditAnalysisEngine`, and `RulesPolicyValidator` explicitly.
+
+## 072 — Policy-contract evolution boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Clarify when a policy source can change without changing the Domain and when a new policy capability requires Domain evolution.
+
+**What happened:**
+Codex distinguished replacing a source adapter from extending the logical policy contract or Rule Engine.
+
+**Final solution:**
+Any source may replace JSON when it maps to the same `RulesPolicy`. Changes to values and entries within that contract do not require Domain changes; new condition types or other contract extensions do.
+
+## 073 — Explicit layer dependencies
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define the allowed compile-time dependencies among API, Application, Domain, and Infrastructure.
+
+**What happened:**
+Codex converted the generic dependency-direction statement into explicit four-layer dependency rules.
+
+**Final solution:**
+API composes Application and Infrastructure; Application depends on Domain; Infrastructure implements the Application port and constructs Domain models; Domain depends on no outer layer.
+
+## 074 — Transport and Domain validation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Decide whether validation belongs only in the API or should also exist in the Domain, and define FluentValidation's role.
+
+**What happened:**
+Codex distinguished HTTP fail-fast validation from transport-independent Domain invariant protection.
+
+**Final solution:**
+API uses FluentValidation for HTTP validation, normalization, and ProblemDetails mapping. Domain independently enforces `Customer` and `RulesPolicy` invariants without a FluentValidation dependency.
+
+## 075 — Enforceable four-project structure
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Make API, Application, Domain, and Infrastructure enforceable as separate .NET projects.
+
+**What happened:**
+Codex turned the four-layer decision into a physical project structure and assigned each project's responsibilities.
+
+**Final solution:**
+The solution will use `CreditEngine.Api`, `CreditEngine.Application`, `CreditEngine.Domain`, and `CreditEngine.Infrastructure`; `rules/` is content in the API project.
+
+## 076 — API OpenAPI responsibility
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Assign responsibility for the OpenAPI documentation required by the product specification.
+
+**What happened:**
+Codex identified that OpenAPI is an API-layer concern and must describe both successful and validation responses.
+
+**Final solution:**
+`CreditEngine.Api` publishes OpenAPI documentation for HTTP contracts, including validation `ProblemDetails` responses.
+
+## 077 — Infrastructure JSON DTO boundary
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Define ownership of DTOs that represent the four policy JSON documents.
+
+**What happened:**
+Codex separated serialization DTOs from the logical policy model so the JSON format cannot leak beyond Infrastructure.
+
+**Final solution:**
+Infrastructure exclusively owns JSON document DTOs and maps them to `RulesPolicy`; API, Application, and Domain use only logical models.
+
+## 078 — Mandatory test requirements
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Incorporate the provided mandatory unit and integration test requirements into the architecture test strategy.
+
+**What happened:**
+Codex translated the required coverage, full request/response tests, six expected-output fixtures, and single-command execution requirement into the testing strategy. It found that the referenced fixture file is not yet present in the repository.
+
+**Final solution:**
+The architecture requires the specified unit and API integration coverage, execution with `dotnet test`, and six `expected-output.json` fixtures. Infrastructure contract and startup tests remain complementary.
+
+## 079 — Six expected classification outputs
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Create the missing `expected-output.json` file containing the six sample customers required by the test specification.
+
+**What happened:**
+Codex created a neutral integration-test fixture with six valid requests and their complete normalized classification responses, then validated it against the current policy configuration and approved-limit formula.
+
+**Final solution:**
+`tests/fixtures/expected-output.json` contains six exact expected outputs covering cluster thresholds, category precedence, fallback, penalty, conservative rounding, and text normalization.

@@ -1,0 +1,353 @@
+{
+  "cases": [
+    {
+      "name": "cluster-a-threshold-and-cap",
+      "request": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "  Ana Silva  ",
+        "age": 25,
+        "score": 700,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": " São Paulo ",
+          "state": "sp",
+          "region": "sudeste"
+        },
+        "jobTitle": "  CEO  "
+      },
+      "expectedStatus": 200,
+      "expectedResponse": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Ana Silva",
+        "age": 25,
+        "score": 700,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": "São Paulo",
+          "state": "SP",
+          "region": "Sudeste"
+        },
+        "jobTitle": "CEO",
+        "creditAnalysisResult": {
+          "cluster": {
+            "priority": 1,
+            "id": "CLUSTER_A",
+            "name": "Diamond",
+            "conditions": {
+              "minScore": 700,
+              "minAge": 25,
+              "maxAge": 60,
+              "hasMarketDebt": false
+            },
+            "baseLimit": 50000,
+            "cap": 100000,
+            "approved": true
+          },
+          "jobTitleCategory": {
+            "priority": 1,
+            "name": "EXECUTIVE",
+            "multiplier": 2.0,
+            "keywords": [
+              "CEO", "CFO", "CTO", "COO", "CIO", "CMO", "Chief",
+              "President", "Vice President", "VP", "Director"
+            ]
+          },
+          "monthlyIncome": 30000,
+          "penaltyRule": null,
+          "approvedLimit": 100000
+        }
+      }
+    },
+    {
+      "name": "cluster-b-threshold-and-category-priority",
+      "request": {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "name": "Bruno Costa",
+        "age": 18,
+        "score": 500,
+        "hasMarketDebt": true,
+        "marketDebtTypes": ["credit_card", "credit_card"],
+        "location": {
+          "city": "Salvador",
+          "state": "BA",
+          "region": "nordeste"
+        },
+        "jobTitle": "Senior Developer"
+      },
+      "expectedStatus": 200,
+      "expectedResponse": {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "name": "Bruno Costa",
+        "age": 18,
+        "score": 500,
+        "hasMarketDebt": true,
+        "marketDebtTypes": ["credit_card"],
+        "location": {
+          "city": "Salvador",
+          "state": "BA",
+          "region": "Nordeste"
+        },
+        "jobTitle": "Senior Developer",
+        "creditAnalysisResult": {
+          "cluster": {
+            "priority": 2,
+            "id": "CLUSTER_B",
+            "name": "Gold",
+            "conditions": {
+              "minScore": 500,
+              "minAge": 18,
+              "maxAge": 65,
+              "excludedMarketDebtTypes": ["credit_default", "loan_default"]
+            },
+            "baseLimit": 20000,
+            "cap": 40000,
+            "approved": true
+          },
+          "jobTitleCategory": {
+            "priority": 2,
+            "name": "SENIOR_PROFESSIONAL",
+            "multiplier": 1.5,
+            "keywords": ["Senior", "Lead", "Manager", "Coordinator", "Supervisor", "Principal"]
+          },
+          "monthlyIncome": 15000,
+          "penaltyRule": null,
+          "approvedLimit": 30000
+        }
+      }
+    },
+    {
+      "name": "cluster-c-age-boundary",
+      "request": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "name": "Camila Rocha",
+        "age": 66,
+        "score": 300,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": "Rio de Janeiro",
+          "state": "RJ",
+          "region": "Sudeste"
+        },
+        "jobTitle": "Analyst"
+      },
+      "expectedStatus": 200,
+      "expectedResponse": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "name": "Camila Rocha",
+        "age": 66,
+        "score": 300,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": "Rio de Janeiro",
+          "state": "RJ",
+          "region": "Sudeste"
+        },
+        "jobTitle": "Analyst",
+        "creditAnalysisResult": {
+          "cluster": {
+            "priority": 3,
+            "id": "CLUSTER_C",
+            "name": "Silver",
+            "conditions": {
+              "minScore": 300
+            },
+            "baseLimit": 5000,
+            "cap": 10000,
+            "approved": true
+          },
+          "jobTitleCategory": {
+            "priority": 3,
+            "name": "MID_PROFESSIONAL",
+            "multiplier": 1.0,
+            "keywords": [
+              "Engineer", "Analyst", "Developer", "Specialist", "Designer",
+              "Accountant", "Consultant", "Architect"
+            ]
+          },
+          "monthlyIncome": 5000,
+          "penaltyRule": null,
+          "approvedLimit": 5000
+        }
+      }
+    },
+    {
+      "name": "fallback-cluster-and-other-category",
+      "request": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "name": "Diego Lima",
+        "age": 24,
+        "score": 299,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": "Manaus",
+          "state": "AM",
+          "region": "Norte"
+        },
+        "jobTitle": "Gardener"
+      },
+      "expectedStatus": 200,
+      "expectedResponse": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "name": "Diego Lima",
+        "age": 24,
+        "score": 299,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": "Manaus",
+          "state": "AM",
+          "region": "Norte"
+        },
+        "jobTitle": "Gardener",
+        "creditAnalysisResult": {
+          "cluster": {
+            "priority": 4,
+            "id": "CLUSTER_D",
+            "name": "Bronze",
+            "conditions": {
+              "catchAll": true
+            },
+            "baseLimit": 0,
+            "cap": 0,
+            "approved": false
+          },
+          "jobTitleCategory": {
+            "priority": 5,
+            "name": "OTHER",
+            "multiplier": 0.8,
+            "keywords": []
+          },
+          "monthlyIncome": 0,
+          "penaltyRule": null,
+          "approvedLimit": 0
+        }
+      }
+    },
+    {
+      "name": "penalty-and-conservative-rounding",
+      "request": {
+        "id": "00000000-0000-4000-8000-000000000005",
+        "name": "Elisa Martins",
+        "age": 30,
+        "score": 300,
+        "hasMarketDebt": true,
+        "marketDebtTypes": ["loan_default"],
+        "location": {
+          "city": "Curitiba",
+          "state": "PR",
+          "region": "sul"
+        },
+        "jobTitle": "Intern"
+      },
+      "expectedStatus": 200,
+      "expectedResponse": {
+        "id": "00000000-0000-4000-8000-000000000005",
+        "name": "Elisa Martins",
+        "age": 30,
+        "score": 300,
+        "hasMarketDebt": true,
+        "marketDebtTypes": ["loan_default"],
+        "location": {
+          "city": "Curitiba",
+          "state": "PR",
+          "region": "Sul"
+        },
+        "jobTitle": "Intern",
+        "creditAnalysisResult": {
+          "cluster": {
+            "priority": 3,
+            "id": "CLUSTER_C",
+            "name": "Silver",
+            "conditions": {
+              "minScore": 300
+            },
+            "baseLimit": 5000,
+            "cap": 10000,
+            "approved": true
+          },
+          "jobTitleCategory": {
+            "priority": 4,
+            "name": "JUNIOR_PROFESSIONAL",
+            "multiplier": 0.7,
+            "keywords": ["Junior", "Trainee", "Intern", "Apprentice", "Assistant", "Associate"]
+          },
+          "monthlyIncome": 3000,
+          "penaltyRule": {
+            "priority": 1,
+            "ruleId": "DEFAULT_DEBT_PENALTY",
+            "conditions": {
+              "marketDebtTypesAnyOf": ["credit_default", "loan_default"]
+            },
+            "penaltyFactor": 0.5
+          },
+          "approvedLimit": 1700
+        }
+      }
+    },
+    {
+      "name": "keyword-case-accent-space-and-hyphen-normalization",
+      "request": {
+        "id": "00000000-0000-4000-8000-000000000006",
+        "name": "Fernanda Alves",
+        "age": 65,
+        "score": 500,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": "Belo Horizonte",
+          "state": "mg",
+          "region": "sudeste"
+        },
+        "jobTitle": "  vIce-PrÉsIdEnT  "
+      },
+      "expectedStatus": 200,
+      "expectedResponse": {
+        "id": "00000000-0000-4000-8000-000000000006",
+        "name": "Fernanda Alves",
+        "age": 65,
+        "score": 500,
+        "hasMarketDebt": false,
+        "marketDebtTypes": [],
+        "location": {
+          "city": "Belo Horizonte",
+          "state": "MG",
+          "region": "Sudeste"
+        },
+        "jobTitle": "vIce-PrÉsIdEnT",
+        "creditAnalysisResult": {
+          "cluster": {
+            "priority": 2,
+            "id": "CLUSTER_B",
+            "name": "Gold",
+            "conditions": {
+              "minScore": 500,
+              "minAge": 18,
+              "maxAge": 65,
+              "excludedMarketDebtTypes": ["credit_default", "loan_default"]
+            },
+            "baseLimit": 20000,
+            "cap": 40000,
+            "approved": true
+          },
+          "jobTitleCategory": {
+            "priority": 1,
+            "name": "EXECUTIVE",
+            "multiplier": 2.0,
+            "keywords": [
+              "CEO", "CFO", "CTO", "COO", "CIO", "CMO", "Chief",
+              "President", "Vice President", "VP", "Director"
+            ]
+          },
+          "monthlyIncome": 20000,
+          "penaltyRule": null,
+          "approvedLimit": 40000
+        }
+      }
+    }
+  ]
+}

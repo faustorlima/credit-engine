@@ -5,9 +5,10 @@
 This solution implements a configuration-driven Credit Classification Engine using
 Clean Architecture.
 
-The primary architectural goal is to isolate business rules from application code.
-Classification, job categories, penalties and income tables are represented as
-configuration, allowing business changes without modifying the domain logic.
+The primary architectural goal is to isolate policy evaluation from application
+code. Classification, job categories, penalties and income tables are
+represented as configuration, allowing changes to policy values and entries
+that conform to `RulesPolicy` without modifying the domain logic.
 
 ---
 
@@ -29,35 +30,57 @@ The solution follows Clean Architecture.
 ```
                 +----------------------+
                 |      API Layer       |
-                | Controllers          |
-                | Validation           |
+                | Endpoints            |
+                | HTTP Validation      |
+                | Composition Root     |
+                | rules/ content       |
                 +----------+-----------+
                            |
                            v
                 +----------------------+
                 |    Application       |
-                | Use Cases            |
-                | Orchestration        |
+                | ClassifyCustomer     |
+                | RulesPolicy snapshot |
                 +----------+-----------+
                            |
                            v
                 +----------------------+
                 |      Domain          |
-                | Entities             |
-                | Rule Engine          |
-                | Services             |
+                | CreditAnalysisEngine |
+                | RulesPolicy          |
+                | RulesPolicyValidator |
                 +----------+-----------+
                            ↑
                            | implements abstractions
                 +----------------------+
                 | Infrastructure       |
-                | JsonRuleProvider               |
-                | JSON Configuration   |
+                | JsonPolicyLoader     |
+                | JSON-to-policy mapper |
                 +----------------------+
 ```
 
 The Domain layer has no dependency on ASP.NET Core,
 JSON serialization or configuration frameworks.
+
+### Project Structure
+
+The solution is composed of four .NET projects:
+
+| Project | Responsibility |
+|---|---|
+| `CreditEngine.Api` | HTTP host, endpoints, FluentValidation integration, response mapping, OpenAPI publication, composition root, and `rules/` content. |
+| `CreditEngine.Application` | `ClassifyCustomer`, startup orchestration contracts, and the `IPolicyLoader` port. |
+| `CreditEngine.Domain` | Pure policy models, `CreditAnalysisEngine`, `RulesPolicyValidator`, and Domain invariants. |
+| `CreditEngine.Infrastructure` | `JsonPolicyLoader`, JSON document DTOs, and JSON-to-`RulesPolicy` mapping. |
+
+### Application Responsibility
+
+`ClassifyCustomer` is the Application use case. It receives a normalized
+`Customer`, invokes `CreditAnalysisEngine` with the immutable `RulesPolicy`,
+and returns `CreditAnalysis`.
+
+The use case orchestrates the flow but does not read JSON, interpret HTTP, or
+implement classification rules.
 
 ---
 
@@ -65,7 +88,19 @@ JSON serialization or configuration frameworks.
 
 Business rules are externalized into JSON configuration files.
 
-The Infrastructure layer is responsible for loading, deserializing, and validating the configuration at application startup. The configuration is then exposed to the Rule Engine as strongly typed rule definitions.
+At application startup, the API composition root supplies the `rules/` content
+location to an `IPolicyLoader` Application port. Infrastructure implements that
+port through `JsonPolicyLoader`, which loads, deserializes, validates the JSON
+document format, and maps the policy documents to a `RulesPolicy` domain model.
+
+The Application startup flow invokes the Domain `RulesPolicyValidator` for the
+logical invariants defined by the policy contract. Only a valid `RulesPolicy`
+can become the running snapshot.
+
+The resulting `RulesPolicy` is an immutable snapshot registered during
+application composition. Application use cases and the Rule Engine receive this
+snapshot as a read-only dependency; no provider or file is accessed during a
+request.
 
 The Rule Engine has no knowledge of JSON or the underlying configuration source. It evaluates the provided rules deterministically according to their configured priority.
 
@@ -118,19 +153,28 @@ Future implementations could replace the JSON provider with:
 - Remote Configuration
 - Rule Service
 
-without changing the domain layer.
+without changing the Domain layer, provided that they map to the same
+`RulesPolicy` contract. Expanding that contract, such as by adding a new
+condition type, requires evolution of the Domain model and Rule Engine.
 
 ### Configuration Boundary
 
-JSON is an infrastructure concern.
+The JSON policy documents are content deployed with the API layer under
+`rules/`. The API layer owns their physical location and supplies it during
+application composition; it does not parse or interpret business rules.
 
-The Infrastructure layer is responsible for loading, deserializing,
-and validating the configuration.
+The Infrastructure layer is responsible for loading, deserializing, validating
+the JSON document format, and mapping those documents to the `RulesPolicy`
+logical model through the `IPolicyLoader` port.
 
-The Domain layer operates on strongly typed rule definitions and has
-no knowledge of the underlying configuration format.
+JSON document DTOs belong exclusively to Infrastructure. Application, Domain,
+and API operate on logical models and never depend on JSON DTO types.
 
-Configuration is loaded and validated at application startup.
+The Domain layer operates on strongly typed rule definitions and has no
+knowledge of the underlying configuration format. `RulesPolicyValidator`
+validates the logical policy invariants after mapping.
+
+The API/Application startup flow coordinates both validation stages.
 Invalid configuration prevents the application from starting.
 
 ---
@@ -141,66 +185,116 @@ Core concepts:
 
 Customer
 
-Cluster
+RulesPolicy
+
+RulesPolicyValidator
 
 ClusterRule
 
-JobCategory
+JobTitleCategory
 
-JobCategoryRule
+IncomeMatrix
 
 PenaltyRule
 
-CreditDecision
+CreditAnalysis
 
-MonthlyIncome
+CreditAnalysisEngine
 
 ---
 
 ## 7. Dependency Direction
 
-API
-↓
+Allowed compile-time dependencies are:
 
-Application
-↓
+| Layer | May depend on |
+|---|---|
+| API | Application and Infrastructure, only to compose the running application. |
+| Application | Domain. |
+| Infrastructure | Application, to implement `IPolicyLoader`, and Domain, to construct `RulesPolicy`. |
+| Domain | No outer layer. |
 
-Domain
-
-Infrastructure implements the abstractions required by the Domain/Application.
-
-No business logic exists in Controllers.
-
----
-
-## 8. Validation
-
-Input validation is performed before entering the domain.
-
-Invalid requests never execute business rules.
+No business logic exists in API endpoints.
 
 ---
 
-## 9. Testing Strategy
+## 8. API Boundary
 
-Unit Tests
+The API layer owns HTTP request/response mapping and the input validation and
+normalization required by FR-001. Application use cases return a
+`CreditAnalysis` domain result.
 
-- Rule evaluation
-- Cluster assignment
-- Job matching
-- Income lookup
-- Penalty calculation
-- Credit calculation
+The API layer maps `CreditAnalysis` to the `creditAnalysisResult` response
+contract defined by FR-007, including the matched logical cluster, job-title
+category, and penalty rule when present. JSON deserialization DTOs used by
+Infrastructure are never exposed in HTTP responses.
 
-Integration Tests
-
-- Complete API flow
-- Invalid payloads
-- Expected output validation
+The API layer publishes OpenAPI documentation for the endpoint, request and
+response contracts, and validation `ProblemDetails` responses.
 
 ---
 
-## 10. Design Decisions
+## 9. Validation
+
+### API Request Validation
+
+The API layer uses FluentValidation to validate and normalize the HTTP request
+before invoking `ClassifyCustomer`. Invalid requests are mapped to the
+`400 application/problem+json` contract in FR-001, and do not execute business
+rules.
+
+### Domain Invariants
+
+The Domain independently enforces the core `Customer` invariants required for
+rule evaluation, including age, score, and consistency between `hasMarketDebt`
+and `marketDebtTypes`. It does not depend on FluentValidation.
+
+`RulesPolicyValidator` independently enforces the logical policy invariants
+after JSON documents have been mapped to `RulesPolicy`.
+
+---
+
+## 10. Testing Strategy
+
+Both unit and integration tests are required. The complete suite must run with
+a single `dotnet test` command.
+
+### Required Domain Unit Tests
+
+- Cluster assignment for every configured cluster, including boundary conditions
+  such as a score exactly at a threshold
+- Job-title category matching, including case-insensitivity and priority order
+- Credit-limit calculation: base formula, penalty application, cap enforcement,
+  and `round_to_nearest_100`
+- Monthly-income lookup for every configured cluster/job-title-category pair
+- Fallback-cluster denial, with zero approved limit in the initial policy
+
+### Required API Integration Tests
+
+- `POST /customers/classify` with a valid request returns the required output
+  contract
+- `POST /customers/classify` with invalid or missing fields returns the required
+  error response
+- All six sample customers defined in `expected-output.json` produce their
+  exact expected outputs
+
+`expected-output.json` and its six sample customers are mandatory integration
+test fixtures and must be provided before implementation.
+
+### Supporting Infrastructure Contract Tests
+
+- Valid policy-document loading and mapping
+- Invalid JSON syntax, types, nullability, and unknown properties
+- Invalid references, duplicate identifiers or matrix entries, and invalid
+  fallback or condition structures
+
+### Supporting Application Startup Tests
+
+- Startup failure for an invalid policy
+
+---
+
+## 11. Design Decisions
 
 ### Why Clean Architecture?
 
@@ -214,8 +308,8 @@ The chosen architecture isolates them from infrastructure concerns.
 
 The challenge explicitly requests a data-driven solution.
 
-Representing rules as JSON allows adding or modifying
-business rules without changing domain code.
+Representing the policy as JSON allows changing policy values and configured
+entries that conform to `RulesPolicy` without changing Domain code.
 
 ---
 
@@ -257,7 +351,7 @@ business requirements emerge.
 
 ---
 
-## 11. Future Improvements
+## 12. Future Improvements
 
 - Database-backed rule provider
 - Rule versioning
