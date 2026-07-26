@@ -35,4 +35,12 @@ public sealed class ClassificationEndpointTests(WebApplicationFactory<Program> f
         Assert.StartsWith("application/problem+json", response.Content.Headers.ContentType!.MediaType);
         Assert.NotNull(problem["errors"]);
     }
+
+    [Fact]
+    public async Task OpenApi_document_is_available()
+    {
+        using var response = await factory.CreateClient().GetAsync("/swagger/v1/swagger.json");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
 }
