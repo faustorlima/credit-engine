@@ -1,12 +1,12 @@
 ## What worked well
 
-- Building the system phase by phase kept the dependency direction enforceable: pure Domain logic was completed before the Application port, JSON adapter, and HTTP host.
-- Keeping JSON DTOs inside Infrastructure and registering a validated `RulesPolicy` snapshot at startup prevented configuration and serialization concerns from leaking into request processing.
+- **SDD - Spec-Driven Development** has proven to be a consistent way to develop and document software in a reliable and maintainable manner.
+- SDD addresses a longstanding documentation problem, since the quality of the output explicitly depends on a good specification.
 
 ## What didn't work
 
-- The initial NuGet restore for the API validation and integration-test dependencies was blocked by the default network sandbox and required explicit approval for NuGet access.
+- Not writing the requirements specification in sufficient detail ends up consuming more time (and money) to refine it before generating code. However, I believe this is a realistic scenario in which an agent can help identify gaps in the requirements, including by making rules explicit. This certainly helps with software maintenance and evolution.
 
 ## What I'd do differently
 
-- Add a dedicated integration test that boots the API with an intentionally invalid rules directory, so startup-failure behavior is verified directly as well as implemented.
+- I would have explored GitHub Spec Kit a little more.
