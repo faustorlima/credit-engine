@@ -1137,3 +1137,16 @@ Codex added `IPolicyLoader` as the asynchronous Application port and implemented
 
 **Final solution:**
 Application depends only on Domain and contains no JSON or HTTP dependency. Its two use-case/port tests pass, while the complete suite reports 37 approved tests.
+
+## 088 — Infrastructure policy-loading implementation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> Exclua o registro 088 de ai-journey/prompts.md. [specs](.specify/specs/) execute a fase 4 descrita em specs/004-implementation-plan.md.
+
+**What happened:**
+Codex removed the previous clarification entry and implemented `JsonPolicyLoader`, internal DTOs for the four JSON documents, strict JSON-format validation, and mapping to the Domain policy model. It also added nine Infrastructure contract tests for valid loading, invalid syntax, types, nullability, unknown properties, and logical-policy inconsistencies after mapping.
+
+**Final solution:**
+Infrastructure implements the Application `IPolicyLoader` port and depends only on Application and Domain. JSON DTOs remain private to Infrastructure; the complete test suite passes with 46 approved tests.
