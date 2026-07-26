@@ -1,3 +1,6 @@
+# Credit Engine - Learnings
+> What worked, what didn't, what you'd do differently
+
 ## What worked well
 
 - **SDD - Spec-Driven Development** has proven to be a consistent approach to developing and documenting software in a reliable and maintainable manner;

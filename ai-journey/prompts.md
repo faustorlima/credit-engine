@@ -1,6 +1,5 @@
-# Credit Engine — Key Interactions
-
-This file records the interactions that materially shaped the specification, architecture, implementation, and verification of Credit Engine.
+# Credit Engine - Prompts
+> Key prompts, what they produced, and how you iterated
 
 ## 1. Initial requirements
 

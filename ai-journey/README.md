@@ -1,4 +1,5 @@
-# Credit Engine
+# Credit Engine - Overview
+> Brief summary: which tools have been used and for what
 
 ## Claude, GPT, and Gemini
 
