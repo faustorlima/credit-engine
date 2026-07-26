@@ -49,7 +49,7 @@ The plan became the basis for the seven implementation phases.
 > Read the specification documents as the only source of requirements, identify ambiguities, and resolve product decisions before implementation.
 
 **What happened:**
-The review identified the decisions needed to remove ambiguity from the policy, validation, response, and configuration contracts.
+The first reading exposed unresolved assumptions in the policy, validation, response, and configuration contracts. Instead of implementing them as guesses, the review addressed the decisions one at a time and incorporated only the approved outcomes into the specifications.
 
 **Final solution:**
 The specifications were refined before implementation began.
@@ -62,7 +62,7 @@ The specifications were refined before implementation began.
 > Use the four policy JSON files as the initial source for classification, job categorization, income, penalties, and approved-limit calculation.
 
 **What happened:**
-The policy files were recognized as data rather than executable business logic.
+The initial data needed a clear boundary from executable rules and a precise calculation order. The policy values were retained as configuration, while the formula was clarified to apply the cap before conservative rounding.
 
 **Final solution:**
 The approved limit is calculated from the matched cluster, category multiplier, penalty factor, cap, and conservative rounding.
@@ -75,7 +75,7 @@ The approved limit is calculated from the matched cluster, category multiplier, 
 > Define validation and normalization for identifiers, text fields, debt types, and Brazilian locations.
 
 **What happened:**
-Input constraints, canonical values, trimming, duplicate removal, and location normalization were clarified.
+The initial contract did not distinguish invalid values from values that could be normalized. The review separated rejection of invalid identifiers, debt types, and locations from trimming text and removing duplicate debt types before rule evaluation.
 
 **Final solution:**
 Invalid requests return field-level ProblemDetails, while valid requests use normalized customer data.
@@ -88,7 +88,7 @@ Invalid requests return field-level ProblemDetails, while valid requests use nor
 > Define cluster priority, fallback representation, and evaluation order.
 
 **What happened:**
-The fallback was made explicit instead of relying on an empty conditions object.
+The initial convention treated a cluster with empty conditions as the fallback. That was ambiguous because it could also describe an incomplete rule, so the representation was revised to make the fallback explicit while preserving priority-based evaluation.
 
 **Final solution:**
 Cluster rules are evaluated by ascending priority; exactly one last-priority fallback uses `conditions.catchAll: true`.
@@ -101,7 +101,7 @@ Cluster rules are evaluated by ascending priority; exactly one last-priority fal
 > Define job-title keyword matching, priority, and fallback behavior.
 
 **What happened:**
-Keyword matching and conflicting-category behavior were clarified.
+The initial keyword list included overlapping and multi-word values, so a simple literal comparison would have produced inconsistent results. The matching normalization and priority rule were defined after considering case, accents, spaces, hyphens, and competing categories.
 
 **Final solution:**
 Keywords match case-insensitively while ignoring accents, spaces, and hyphens; the lowest-priority-number match wins and `OTHER` is the fallback.
@@ -114,7 +114,7 @@ Keywords match case-insensitively while ignoring accents, spaces, and hyphens; t
 > Define penalty selection and rounding behavior for approved limits.
 
 **What happened:**
-Overlapping penalties and half-way rounding were resolved.
+The policy could match more than one penalty and the formula did not define an exact half-way rounding outcome. The alternatives were reviewed and a deterministic, conservative rule was selected for both cases.
 
 **Final solution:**
 Only the first matching penalty applies, no penalty uses factor `1.0`, and exact half-way values round down to the lower hundred.
@@ -127,7 +127,7 @@ Only the first matching penalty applies, no penalty uses factor `1.0`, and exact
 > Define successful and invalid classification API responses.
 
 **What happened:**
-The success payload and error behavior were made explicit.
+The response needed to expose the matched logical policy data without leaking JSON DTOs, and invalid requests needed a single predictable HTTP contract. The API and Domain boundaries were clarified before defining the payload and ProblemDetails behavior.
 
 **Final solution:**
 `POST /customers/classify` returns `200 OK` with the normalized customer and `creditAnalysisResult`; invalid input returns `400 application/problem+json`.
@@ -153,7 +153,7 @@ The individual decisions were integrated into a single coherent specification.
 > Define the logical contract and validation rules for the policy JSON documents.
 
 **What happened:**
-The contract was refined around strict types, no unknown properties or nulls, canonical identifiers, priorities, references, and matrix coverage.
+Accepting loosely shaped JSON could silently ignore misspellings, invalid numeric representations, or broken references. The contract was tightened iteratively around strict types, no unknown properties or nulls, canonical identifiers, priorities, references, and matrix coverage.
 
 **Final solution:**
 `002-rules-configuration.md` defines a closed, validated policy-document contract.
@@ -166,7 +166,7 @@ The contract was refined around strict types, no unknown properties or nulls, ca
 > Define policy-file ownership, startup loading, immutability, and two-stage validation.
 
 **What happened:**
-Physical deployment ownership was separated from JSON parsing and logical policy validation.
+Reading policy files during each request would have coupled request processing to storage and made the active policy mutable. The design moved file ownership to API deployment, JSON parsing to Infrastructure, and logical validation to Domain during startup.
 
 **Final solution:**
 API owns `rules/`; Infrastructure loads and maps them; Domain validates invariants; requests consume an immutable `RulesPolicy` snapshot.
@@ -179,7 +179,7 @@ API owns `rules/`; Infrastructure loads and maps them; Domain validates invarian
 > Define the Domain, Application, Infrastructure, and API boundaries and their allowed compile-time dependencies.
 
 **What happened:**
-The four-layer design was turned into enforceable project responsibilities.
+The initial layer description was conceptual and did not prevent accidental references. It was converted into separate projects with explicit compile-time dependency rules so JSON and HTTP concerns could not leak into Domain.
 
 **Final solution:**
 Application depends on Domain; Infrastructure depends on Application and Domain; API composes Application and Infrastructure; Domain has no outer-layer dependency.
@@ -192,7 +192,7 @@ Application depends on Domain; Infrastructure depends on Application and Domain;
 > Define mandatory unit and integration coverage and create the six expected classification outputs.
 
 **What happened:**
-The risk areas were mapped to Domain, Infrastructure, Application, and API tests.
+The original test strategy named required coverage but lacked the six expected HTTP outputs needed to verify the full contract. The fixture was created and the risks were mapped to Domain, Infrastructure, Application, and API tests.
 
 **Final solution:**
 The repository includes fixture-driven API integration tests and supporting unit and contract tests runnable through `dotnet test`.
@@ -218,7 +218,7 @@ The plan was reorganized around a four-project foundation, Domain first, then Ap
 > Create the four projects under `src/` and enforce the architecture through solution references.
 
 **What happened:**
-The production and test projects were created, rules moved into the API project, and OpenAPI was enabled.
+The existing single-project starting point could not enforce the intended architecture. The solution was reorganized into production and test projects, rules were moved into API-owned content, and OpenAPI was enabled as a composition-root baseline.
 
 **Final solution:**
 The solution has enforceable API, Application, Domain, and Infrastructure project boundaries.
@@ -257,7 +257,7 @@ Application orchestrates the Domain engine using an injected read-only policy sn
 > Execute the Infrastructure policy-loading phase.
 
 **What happened:**
-Strict JSON parsing, private DTOs, logical-model mapping, and contract tests were implemented.
+The implementation separated strict JSON-format checks and private DTOs from the Domain logical validator and its policy invariants. This avoided making Infrastructure responsible for HTTP concerns or for the business meaning of a valid policy.
 
 **Final solution:**
 Infrastructure implements `IPolicyLoader` without depending on API.
@@ -270,7 +270,7 @@ Infrastructure implements `IPolicyLoader` without depending on API.
 > Execute the REST API phase.
 
 **What happened:**
-Startup composition, FluentValidation, normalization, ProblemDetails, OpenAPI, and fixture-based integration tests were implemented.
+The first package restore for FluentValidation and ASP.NET Core integration testing was blocked by the default network sandbox, so explicit NuGet approval was required. The API initially returned Domain objects directly, which exposed implementation-only condition members and omitted a required `null` penalty field; the response mapping was then adjusted against the six fixtures.
 
 **Final solution:**
 The API validates policy at startup and returns the specified output for all six fixture cases.
