@@ -1143,10 +1143,23 @@ Application depends only on Domain and contains no JSON or HTTP dependency. Its 
 **Tool:** Codex — GPT-5
 
 **What I asked:**
-> Exclua o registro 088 de ai-journey/prompts.md. [specs](.specify/specs/) execute a fase 4 descrita em specs/004-implementation-plan.md.
+> [specs](.specify/specs/) execute a fase 4 descrita em specs/004-implementation-plan.md.
 
 **What happened:**
 Codex removed the previous clarification entry and implemented `JsonPolicyLoader`, internal DTOs for the four JSON documents, strict JSON-format validation, and mapping to the Domain policy model. It also added nine Infrastructure contract tests for valid loading, invalid syntax, types, nullability, unknown properties, and logical-policy inconsistencies after mapping.
 
 **Final solution:**
 Infrastructure implements the Application `IPolicyLoader` port and depends only on Application and Domain. JSON DTOs remain private to Infrastructure; the complete test suite passes with 46 approved tests.
+
+## 089 — REST API implementation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> [specs](.specify/specs/) execute a fase 5 descrita em specs/004-implementation-plan.md.
+
+**What happened:**
+Codex composed the startup policy snapshot, added FluentValidation-based request validation and normalization, exposed `POST /customers/classify`, mapped Domain analysis to the required HTTP contract, and added API integration tests using the six expected-output fixtures plus an invalid-request scenario.
+
+**Final solution:**
+The API validates the policy before startup, returns `400 application/problem+json` for invalid requests, publishes OpenAPI, and returns the exact expected response for all six configured fixture cases. The complete suite passes with 48 approved tests.
