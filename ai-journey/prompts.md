@@ -1163,3 +1163,16 @@ Codex composed the startup policy snapshot, added FluentValidation-based request
 
 **Final solution:**
 The API validates the policy before startup, returns `400 application/problem+json` for invalid requests, publishes OpenAPI, and returns the exact expected response for all six configured fixture cases. The complete suite passes with 48 approved tests.
+
+## 090 — Operational documentation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> [specs](.specify/specs/) execute a fase 6 descrita em specs/004-implementation-plan.md.
+
+**What happened:**
+Codex created the operational README, linked it to the normative specifications, documented build/test/run commands, the API-owned policy-file location, startup validation, and the implemented four-project architecture. It also recorded material implementation learnings.
+
+**Final solution:**
+`README.md` gives a new developer the verified commands to build, test, and run the system, while `ai-journey/learnings.md` captures the relevant architectural and delivery lessons. The complete test suite remains green with 48 approved tests.
