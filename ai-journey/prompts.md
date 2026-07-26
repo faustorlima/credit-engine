@@ -1098,3 +1098,29 @@ Codex removed the generic documentation and final-review wording, avoiding dupli
 
 **Final solution:**
 Phase 6 documents building, testing, running, API-owned policy files, and the implemented architecture. Phase 7 verifies build and test execution, exact fixtures, startup and HTTP errors, OpenAPI, dependency direction, and final hygiene.
+
+## 085 — Four-project foundation implementation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> [specs](.specify/specs/) a solution .net já está criada na raiz e a pasta src/ está pronta. Com base na fase 1 de specs/004-implementation-plan.md, crie/organize os 4 projetos em src/ (CreditEngine.Api, CreditEngine.Application, CreditEngine.Domain, CreditEngine.Infrastructure) e adicione as referências na Solution de acordo com specs/003-architecture.md.
+
+**What happened:**
+Codex created the four .NET 8 production projects under `src/`, added the Phase 1 test-project foundation under `tests/`, and registered all projects in `CreditEngine.slnx`. It enforced the approved dependency direction, moved the policy JSON files into the API project's `rules/` content, and established a Swagger/OpenAPI composition baseline.
+
+**Final solution:**
+`CreditEngine.Api` references Application and Infrastructure; Application references Domain; Infrastructure references Application and Domain. The solution builds successfully, `dotnet test` completes successfully, and the API returns `200` from its OpenAPI document endpoint.
+
+## 086 — Domain model implementation
+
+**Tool:** Codex — GPT-5
+
+**What I asked:**
+> [specs](.specify/specs/) execute a fase 2 descrita em specs/004-implementation-plan.md.
+
+**What happened:**
+Codex implemented the pure .NET 8 Domain model, including `Customer` invariants, immutable policy models, `RulesPolicyValidator`, `CreditAnalysisEngine`, and `CreditAnalysis`. It added 35 Domain unit tests covering cluster selection and boundaries, job-title normalization and precedence, all income-matrix pairs, penalty precedence, limit capping and conservative rounding, fallback denial, and policy/customer validation.
+
+**Final solution:**
+The Domain project has no ASP.NET Core, JSON, FluentValidation, or external package dependencies. It builds independently, and the complete `dotnet test` suite passes with all 35 current Domain tests approved.

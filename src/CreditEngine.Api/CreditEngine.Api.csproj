@@ -11,4 +11,13 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="rules\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CreditEngine.Application\CreditEngine.Application.csproj" />
+    <ProjectReference Include="..\CreditEngine.Infrastructure\CreditEngine.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

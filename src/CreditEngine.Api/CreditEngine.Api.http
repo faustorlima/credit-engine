@@ -1,0 +1,6 @@
+@CreditEngine.Api_HostAddress = http://localhost:5241
+
+GET {{CreditEngine.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
