@@ -42,6 +42,19 @@ app.MapPost("/customers/classify", async (ClassifyCustomerRequest request, IVali
 .WithName("ClassifyCustomer")
 .WithOpenApi();
 
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    if (app.Environment.IsDevelopment())
+    {
+        var url = "http://localhost:5241/swagger";
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
+    }
+});
+
 app.Run();
 
 public partial class Program;
