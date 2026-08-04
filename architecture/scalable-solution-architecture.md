@@ -20,16 +20,22 @@ C4Context
             System_Boundary(systemCreditEngineDataAnalysisBoundary, "Credit Engine Data Analysis"){
                 System(systemCreditEngineDataAnalysis, "Credit Engine Data Analysis", "Allow Credit Area to<br /> analyze Credit Historical Data")
             }
+
+            System_Boundary(systemCreditEngineCalculationMemoryBoundary, "Credit Engine Calculation Memory"){
+                System(systemCreditEngineCalculationMemory, "Credit Engine Calculation Memory", "Persists to<br /> analyze Credit calculation memory")
+            }
         }
     }
 
     BiRel(customer, externalCreditSystem, "Request Quote")
     BiRel(externalCreditSystem, systemCreditEngine, "Request<br />/Response<br /> Quote")
     Rel(systemCreditEngine, systemCreditEngineDataAnalysis, "populates", "batch")
+    Rel(systemCreditEngine, systemCreditEngineCalculationMemory, "populates", "batch")
 
     UpdateRelStyle(customer, externalCreditSystem, $offsetY="-50")
     UpdateRelStyle(externalCreditSystem, systemCreditEngine, $offsetY="-20")
     UpdateRelStyle(systemCreditEngine, systemCreditEngineDataAnalysis, $offsetY="-30")
+    UpdateRelStyle(systemCreditEngine, systemCreditEngineCalculationMemory, $offsetY="-30")
 ```
 
 ## Container
@@ -95,6 +101,32 @@ C4Container
 
     UpdateRelStyle(database, batchJob, $offsetX="10", $offsetY="-40")
     UpdateRelStyle(batchJob, dw, $offsetX="-30", $offsetY="-30")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+
+```
+
+
+### Credit Engine Calculation Memory
+```mermaid
+C4Container
+
+    Enterprise_Boundary(b1, "Bank"){
+        System_Boundary(creditEngineSystemBoundary, "Credit Engine System Boundary"){
+            SystemDb(database, "<br />Calculation<br /> Database")
+        }
+
+        System_Boundary(systemCreditEngineDataAnalysisBoundary, "Credit Engine Data Analysis"){
+            System(batchJob, "<br /><br />Batch Job<br /> Calculation Memory<br />  Persistence", "python/polars")
+            SystemDb(s3, "<br /><br />Credit<br /> Calculation Memory<br /> Database", "s3/parquet files")
+        }
+    }
+
+    Rel(database, batchJob, "Get<br /> Last<br /> Month<br /> Calculations")
+    Rel(batchJob, s3, "Monthly<br /> Consolidation")
+
+    UpdateRelStyle(database, batchJob, $offsetX="10", $offsetY="-40")
+    UpdateRelStyle(batchJob, s3, $offsetX="-30", $offsetY="-30")
 
     UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 
